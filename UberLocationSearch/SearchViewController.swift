@@ -7,8 +7,9 @@
 
 import UIKit
 
-class SearchViewController: UIViewController {
-
+class SearchViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
+    
+    
     //UI Label로 라벨을 작성 한다.
     private let label: UILabel = {
        let label = UILabel()
@@ -31,6 +32,18 @@ class SearchViewController: UIViewController {
         return field
     }()
     
+    //검색할 때 테이블뷰를 표시해준다.
+    private let tableView: UITableView = {
+       let table = UITableView()
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        return table
+    }()
+    
+    
+    
+    //위치를 담는 locations를 배열로 선언
+    var locations = [Location]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         //system background컬러로 설정후
@@ -38,6 +51,10 @@ class SearchViewController: UIViewController {
         //위에서 label만든것을 addsubview에 추가시켜준다.
         view.addSubview(label)
         view.addSubview(field)
+        view.addSubview(tableView)
+        tableView.delegate = self
+        tableView.dataSource = self
+        field.delegate = self
 
     }
     
@@ -49,5 +66,42 @@ class SearchViewController: UIViewController {
         label.frame = CGRect(x: 10, y: 10, width: label.frame.size.width, height: label.frame.size.height)
         //field의 프레임은 label보다 밑에 와야하기 때문에 y가 20+ 라벨위치이다          //사이즈도 view에서 20보다 작게 높이는 50으로 고정
         field.frame = CGRect(x: 10, y: 20+label.frame.size.height, width: view.frame.size.width-20, height: 50)
+        
+        let tableY: CGFloat = field.frame.origin.y+field.frame.size.height+5
+        tableView.frame = CGRect(x: 0, y: tableY, width: view.frame.size.width, height: view.frame.size.height-tableY)
+    }
+    
+    
+    //다시찾아보면서 해보기로
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        field.resignFirstResponder()
+        if let text = field.text, !text.isEmpty {
+            LocationManager.shared.findLocations(with: text) { [weak self] locations in
+                DispatchQueue.main.async {
+                    self?.locations = locations
+                    self?.tableView.reloadData()
+                }
+            }
+        }
+        return true
+    }
+    
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return locations.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell",for: indexPath)
+        cell.textLabel?.text = locations[indexPath.row].title
+        cell.textLabel?.numberOfLines = 0
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true )
+        
+        //위치를 지도에 알리고 계속 표시
+        let coordinate = locations[indexPath.row].coordinates
     }
 }
