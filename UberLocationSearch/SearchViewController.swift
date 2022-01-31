@@ -54,6 +54,7 @@ class SearchViewController: UIViewController, UITextFieldDelegate, UITableViewDe
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.backgroundColor = .secondarySystemBackground
         field.delegate = self
 
     }
@@ -95,6 +96,8 @@ class SearchViewController: UIViewController, UITextFieldDelegate, UITableViewDe
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell",for: indexPath)
         cell.textLabel?.text = locations[indexPath.row].title
         cell.textLabel?.numberOfLines = 0
+        cell.contentView.backgroundColor = .secondarySystemBackground
+        cell.backgroundColor = .secondarySystemBackground
         return cell
     }
     
