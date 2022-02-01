@@ -6,8 +6,18 @@
 //
 
 import UIKit
+import CoreLocation
+
+//protocol을 이용하여 좌표위치를 찍어준다
+protocol SearchViewControllerDelegate: AnyObject {
+    func searchViewController(_ vc: SearchViewController, didSelectLocationWith coordinates:CLLocationCoordinate2D?)
+}
+
+
 
 class SearchViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
+    
+    weak var delegate: SearchViewControllerDelegate?
     
     
     //UI Label로 라벨을 작성 한다.
@@ -106,5 +116,8 @@ class SearchViewController: UIViewController, UITextFieldDelegate, UITableViewDe
         
         //위치를 지도에 알리고 계속 표시
         let coordinate = locations[indexPath.row].coordinates
+        
+        //델리게이트로 searchviewcontroller 에 선택된걸 coordinate에 들어있는 좌표를 viewcontroller에서 찍어준다.
+        delegate?.searchViewController(self, didSelectLocationWith: coordinate)
     }
 }
